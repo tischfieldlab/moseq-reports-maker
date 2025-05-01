@@ -1,6 +1,5 @@
 import logging
 import os
-import traceback
 import click
 
 from msq_maker.msq import MSQ

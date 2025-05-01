@@ -1,8 +1,8 @@
 from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, asdict, field, Field
 from typing import Dict, Generic, List, Type, TypeVar, cast
-from moseq2_viz.util import parse_index
 
+from moseq2_viz.util import parse_index
 import toml
 
 from msq_maker.msq import MSQ, MSQConfig
