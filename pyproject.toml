@@ -16,11 +16,12 @@ classifiers = [
 ]
 dependencies = [
     "click==7.0",
-    "h5py",
-    "numpy",
-    "pandas",
-    "tqdm",
-    "typing-extensions"
+    "h5py==2.10.0",
+    "numpy==1.18.3",
+    "pandas==1.0.5",
+    "tqdm==4.48.0",
+    "typing-extensions",
+    "toml"
 ]
 dynamic = ["version", "readme"]
 
@@ -39,7 +40,6 @@ dev = [
     "black",
     "mypy",
     "pydocstyle[toml]",
-    "toml",
     "twine",
     "build",
 ]

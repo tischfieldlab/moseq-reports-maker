@@ -6,8 +6,7 @@ from moseq2_viz.scalars.util import scalars_to_dataframe
 from moseq2_viz.util import parse_index
 
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig
-from .base import PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
 
 
 @dataclass

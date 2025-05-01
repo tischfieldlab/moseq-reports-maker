@@ -5,12 +5,9 @@ from moseq2_viz.model.dist import get_behavioral_distance
 from moseq2_viz.util import parse_index
 import pandas as pd
 
-from msq_maker.util import get_syllable_id_mapping, syllableMatriciesToLongForm
-
-
+from ..util import get_syllable_id_mapping, syllableMatricesToLongForm
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig
-from .base import PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
 
 
 @dataclass
@@ -42,7 +39,7 @@ class BehavioralDistanceProducer(BaseProducer[BehavioralDistanceConfig]):
 
         syllable_mapping = get_syllable_id_mapping(self.mconfig.model)
 
-        df_dict = syllableMatriciesToLongForm(dist, syllable_mapping)
+        df_dict = syllableMatricesToLongForm(dist, syllable_mapping)
 
         df = pd.DataFrame.from_dict(data=df_dict)
         dest = "behaveDistances.ms{}.json".format(self.mconfig.max_syl)

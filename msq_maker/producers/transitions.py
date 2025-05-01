@@ -5,15 +5,11 @@ from joblib import Parallel, delayed
 from moseq2_viz.util import parse_index
 from moseq2_viz.model.trans_graph import get_transition_matrix
 from moseq2_viz.model.util import parse_model_results
-
 import pandas as pd
 
-from msq_maker.util import get_syllable_id_mapping, syllableMatriciesToLongForm
-
-
+from ..util import get_syllable_id_mapping, syllableMatricesToLongForm
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig
-from .base import PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
 
 
 @dataclass
@@ -58,5 +54,5 @@ class TransitionsProducer(BaseProducer[TransitionsConfig]):
 
         decorate = {"uuid": uuid, "default_group": index["files"][uuid]["group"]}
 
-        data = syllableMatriciesToLongForm(mats, syllable_mapping, decorate)
+        data = syllableMatricesToLongForm(mats, syllable_mapping, decorate)
         return pd.DataFrame.from_dict(data=data)

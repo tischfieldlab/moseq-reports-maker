@@ -3,15 +3,13 @@ import logging
 import os
 import subprocess
 from dataclasses import dataclass, field
-import sys
 from typing import List, Tuple, Type, Union
 from typing_extensions import Literal
 
 import pandas as pd
 
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig
-from .base import PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
 
 
 @dataclass

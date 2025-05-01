@@ -3,7 +3,6 @@ import logging
 import os
 import subprocess
 from dataclasses import dataclass, field
-import sys
 from typing import Tuple, Type, Union
 from typing_extensions import Literal
 
@@ -12,11 +11,9 @@ from moseq2_viz.util import parse_index
 import numpy as np
 import pandas as pd
 
-from msq_maker.util import ensure_even
-
+from ..util import ensure_even
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig
-from .base import PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
 
 
 @dataclass

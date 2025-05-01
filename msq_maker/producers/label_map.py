@@ -4,12 +4,9 @@ from typing import Type
 
 import pandas as pd
 
-from msq_maker.util import get_syllable_id_mapping, syllableMatriciesToLongForm
-
-
+from ..util import get_syllable_id_mapping
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig
-from .base import PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
 
 
 @dataclass

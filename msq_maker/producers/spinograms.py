@@ -3,12 +3,10 @@ import logging
 import os
 import subprocess
 from dataclasses import dataclass
-import sys
 from typing import Type
 
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig
-from .base import PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
 
 
 @dataclass

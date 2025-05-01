@@ -48,7 +48,7 @@ def get_max_states(model_file: str) -> int:
     return model['run_parameters']['max_states']
 
 
-def syllableMatriciesToLongForm(mats_dict, mapping: List[LabelMap], decorate=None):
+def syllableMatricesToLongForm(mats_dict, mapping: List[LabelMap], decorate=None):
     # assumes mats are indexed by RAW ID!!!
 
     shape = mats_dict[list(mats_dict.keys())[0]].shape
