@@ -95,22 +95,22 @@ def ensure_even(num: int):
 
 def setup_logging(log_file: Optional[str] = None) -> None:
     logging.captureWarnings(True)
-    # logging.lastResort = logging.NullHandler()
 
     logger = logging.getLogger(None)
     logger.handlers.clear()
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("{asctime} {levelname:8s} {message}", style="{")
 
     # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
-    console.setFormatter(formatter)
+    console_formatter = logging.Formatter("{levelname:8s} {message}", style="{")
+    console.setFormatter(console_formatter)
     logger.addHandler(console)
 
     # file handler
     if log_file is not None:
         handler = logging.FileHandler(log_file, mode="w")
         handler.setLevel(logging.INFO)
-        handler.setFormatter(formatter)
+        file_formatter = logging.Formatter("{asctime} {levelname:8s} {message}", style="{")
+        handler.setFormatter(file_formatter)
         logger.addHandler(handler)
