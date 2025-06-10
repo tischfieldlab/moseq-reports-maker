@@ -6,7 +6,7 @@ import pandas as pd
 
 from ..util import get_syllable_id_mapping
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 
 @dataclass
@@ -16,8 +16,6 @@ class LabelMapConfig(BaseProducerArgs):
 
 @PluginRegistry.register("label_map")
 class LabelMapProducer(BaseProducer[LabelMapConfig]):
-    def __init__(self, config: MoseqReportsConfig):
-        super().__init__(config)
 
     @classmethod
     def get_args_type(cls) -> Type[LabelMapConfig]:

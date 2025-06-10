@@ -1,7 +1,8 @@
 import logging
 from typing import Dict, List, Optional
 from typing_extensions import TypedDict
-from moseq2_viz.model.util import parse_model_results, relabel_by_usage
+from moseq2_viz.model.util import parse_model_results, relabel_by_usage, get_syllable_statistics
+from moseq2_viz.util import parse_index
 
 
 LabelMap = TypedDict('LabelMap', {
@@ -32,6 +33,34 @@ def get_syllable_id_mapping(model_file: str) -> List[LabelMap]:
                     'frames': labels_frames[si][i]
                 }
     return list(label_map.values())
+
+
+def get_max_syllable(model: dict) -> int:
+    """Retrieves the maximum syllable from the model.
+    
+    Args:
+        model (dict): a parsed model.
+        
+    Returns:
+        int: The maximum syllable value.
+    """
+    syll_stats = get_syllable_statistics(model["labels"])[0]
+    for sid, use_count in syll_stats.items():
+        if use_count == 0:
+            return sid
+
+
+def get_groups_index(index_file: str) -> list:
+    """Retrieves the groups from the index file.
+    
+    Args:
+        index_file (str): The path to the index file.
+        
+    Returns:
+        list: The groups in the index.
+    """
+    index, _ = parse_index(index_file)
+    return list(sorted(set([f["group"] for f in index["files"]])))
 
 
 def get_max_states(model_file: str) -> int:

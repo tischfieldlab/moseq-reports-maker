@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Type
 
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 
 @dataclass
@@ -16,8 +16,6 @@ class SpinogramsConfig(BaseProducerArgs):
 
 @PluginRegistry.register("spinograms")
 class SpinogramsProducer(BaseProducer[SpinogramsConfig]):
-    def __init__(self, config: MoseqReportsConfig):
-        super().__init__(config)
 
     @classmethod
     def get_args_type(cls) -> Type[SpinogramsConfig]:

@@ -7,7 +7,7 @@ import pandas as pd
 
 from ..util import get_syllable_id_mapping, syllableMatricesToLongForm
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 
 @dataclass
@@ -17,8 +17,6 @@ class BehavioralDistanceConfig(BaseProducerArgs):
 
 @PluginRegistry.register("behavioral_distance")
 class BehavioralDistanceProducer(BaseProducer[BehavioralDistanceConfig]):
-    def __init__(self, config: MoseqReportsConfig):
-        super().__init__(config)
 
     @classmethod
     def get_args_type(cls) -> Type[BehavioralDistanceConfig]:

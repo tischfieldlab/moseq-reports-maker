@@ -1,21 +1,15 @@
-from dataclasses import dataclass, field
 import json
 import os
 from typing import Any, Dict
 import zipfile
 import pandas as pd
 
+from msq_maker import config
 
-@dataclass
-class MSQConfig:
-    name: str = field(default="moseq-report", metadata={"doc": "Name of the report"})
-    out_dir: str = field(default=os.getcwd(), metadata={"doc": "Output directory for the report"})
-    tmp_dir: str = field(default=os.path.join(os.getcwd(), "tmp"), metadata={"doc": "Temporary directory for intermediate files"})
-    ext: str = field(default="msq", metadata={"doc": "File extension for the final output file"})
 
 
 class MSQ:
-    def __init__(self, config: MSQConfig):
+    def __init__(self, config: "config.MSQConfig"):
         self.config = config
         self.manifest: Dict[str, Any] = {}
 

@@ -1,4 +1,4 @@
-from .base import PluginRegistry, MoseqReportsConfig
+from .base import PluginRegistry
 from .behavioral_distance import BehavioralDistanceProducer, BehavioralDistanceConfig
 from .crowd_movies import CrowdMoviesProducer, CrowdMoviesConfig
 from .groups import GroupsProducer, GroupsConfig

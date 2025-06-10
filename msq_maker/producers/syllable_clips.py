@@ -9,7 +9,7 @@ from typing_extensions import Literal
 import pandas as pd
 
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 
 @dataclass
@@ -33,8 +33,6 @@ class SyllableClipsConfig(BaseProducerArgs):
 
 @PluginRegistry.register("syllable_clips")
 class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
-    def __init__(self, config: MoseqReportsConfig):
-        super().__init__(config)
 
     @classmethod
     def get_args_type(cls) -> Type[SyllableClipsConfig]:

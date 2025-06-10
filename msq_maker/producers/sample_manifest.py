@@ -5,7 +5,7 @@ from moseq2_viz.util import parse_index
 import pandas as pd
 
 from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, MoseqReportsConfig, PluginRegistry
+from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 
 @dataclass
@@ -15,8 +15,6 @@ class SampleManifestConfig(BaseProducerArgs):
 
 @PluginRegistry.register("sample_manifest")
 class SampleManifestProducer(BaseProducer[SampleManifestConfig]):
-    def __init__(self, config: MoseqReportsConfig):
-        super().__init__(config)
 
     @classmethod
     def get_args_type(cls) -> Type[SampleManifestConfig]:

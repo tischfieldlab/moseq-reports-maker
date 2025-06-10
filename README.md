@@ -2,18 +2,27 @@
 package to generate *.msq files from moseq data for consumption by moseq-reports
 
 ## Install
+Please ensure the following dependencies are installed:
+```sh
+pip install git+https://github.com/dattalab/moseq2-viz.git
+pip install git+https://github.com/tischfieldlab/moseq-spinogram.git
+pip install git+https://github.com/tischfieldlab/moseq-syllable-clips.git
 ```
+
+Then install this package:
+```sh
 pip install git+https://github.com/tischfieldlab/moseq-reports-maker.git
 ```
 
 ## Usage
 Begin by creating a configuration file:
-```
+```sh
 msq-maker generate-config
 ```
+
 The above command will create `msq-config.toml` in the current directory. Edit this file to with relevant information. Most critical
 will be the section `[model] `. Below is an example:
-```
+```ini
 [model]
 index = "/path/to/moseq2-index.yaml"
 model = "/path/to/moseq-model.p"
@@ -28,11 +37,30 @@ manifest_session_id_column = "session_id"
 ```
 
 If you have questions about the configuration entries for a given producer, you can lookup a description:
-```
+```sh
 msq-maker explain-config <producer_name>
 ```
 
-Finally, to generate the report, run the `make-report` command:
+To get a list of available producers, run the command:
+```sh
+msq-maker list-producers
 ```
+will generate output something like:
+```txt
+Available producers:
+ - behavioral_distance
+ - crowd_movies
+ - groups
+ - label_map
+ - sample_manifest
+ - scalars
+ - spinograms
+ - syllable_clips
+ - transitions
+ - usage
+```
+
+Finally, to generate the report, run the `make-report` command:
+```sh
 msq-maker make-report --config-file /path/to/msq-config.toml
 ```
