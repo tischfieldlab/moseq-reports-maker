@@ -8,6 +8,10 @@ from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 @dataclass
 class GroupsConfig(BaseProducerArgs):
+    """Configuration for the `groups` producer.
+
+    This has no additional parameters, as it simply writes the groups.
+    """
     pass
 
 

@@ -14,11 +14,16 @@ from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 @dataclass
 class SyllableClipsConfig(BaseProducerArgs):
-    prepend: float = field(default=2.0, metadata={"doc": "Time to prepend to the start of each syllable clip."})
-    append: float = field(default=2.0, metadata={"doc": "Time to append to the end of each syllable clip."})
+    """Configuration for the `syllable_clips` producer.
+
+    This producer produces syllable clips, or syllable-locked videos in RGB, depth, IR, or composed.
+    For more specific information you can check the `moseq-syllable-clips` package.
+    """
+    prepend: float = field(default=2.0, metadata={"doc": "Time (seconds) to prepend to the start of each syllable clip."})
+    append: float = field(default=2.0, metadata={"doc": "Time (seconds) to append to the end of each syllable clip."})
     max_examples: int = field(default=10, metadata={"doc": "Maximum number of examples to show per syllable."})
-    streams: List[str] = field(default_factory=list, metadata={"doc": "List of streams to include in the output. available streams: depth, rgb, ir, composed"})
-    rgb_crop: Union[Literal["none", "auto"], Tuple[int,int,int,int]] = "auto"
+    streams: List[str] = field(default_factory=list, metadata={"doc": "List of streams to include in the output. Available streams: depth, rgb, ir, composed, but may depend on the modalities used when acquiring the raw data."})
+    rgb_crop: Union[Literal["none", "auto"], Tuple[int,int,int,int]] = field(default="auto", metadata={"doc": "Crop to apply to RGB clips. If 'none', no crop is applied. If 'auto', the crop is determined automatically based on the extracted data ROI (only works properly if depth and RGB are the same shape, typical for Kinect2 data). Otherwise, a tuple of (x1, y1, x2, y2) defining the crop region."})
 
     def __post_init__(self):
         if len(self.streams) == 0:
@@ -44,7 +49,7 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
         basename = "syllable"
         logging.info("Creating syllable clips at {}\n".format(out_dir))
         syl_clip_args = [
-            "syllable_clips",
+            "syllable-clips",
             "corpus-multiple",
             self.mconfig.index,
             self.mconfig.model,

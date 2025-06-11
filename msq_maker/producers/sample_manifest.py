@@ -10,6 +10,10 @@ from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 @dataclass
 class SampleManifestConfig(BaseProducerArgs):
+    """Configuration for the `sample_manifest` producer.
+
+    This has no additional parameters, as it simply writes the sample manifest.
+    """
     pass
 
 

@@ -13,6 +13,10 @@ from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 @dataclass
 class UsageConfig(BaseProducerArgs):
+    """Configuration for the `usage` producer.
+
+    This has no additional parameters, as it simply writes the usage values.
+    """
     pass
 
 @PluginRegistry.register("usage")

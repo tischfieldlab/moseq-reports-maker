@@ -2,7 +2,7 @@ import glob
 import logging
 import os
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Type
 
 from ..msq import MSQ
@@ -11,7 +11,11 @@ from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 @dataclass
 class SpinogramsConfig(BaseProducerArgs):
-    max_examples: int = 10
+    """Configuration for the `spinogram` producer.
+
+    This producer produces spinograms. For more specific information you can check the `moseq-spinogram` package.
+    """
+    max_examples: int = field(default=10, metadata={"doc": "Maximum number of examples to generate for each syllable."})
 
 
 @PluginRegistry.register("spinograms")

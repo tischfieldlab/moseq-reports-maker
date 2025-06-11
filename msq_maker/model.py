@@ -31,8 +31,10 @@ def parse_manifest(manifest_file: str) -> pd.DataFrame:
             f'Did not understand manifest format. Supported file extensions are *.tsv (tab-separated), *.csv (comma-separated), or *.xlsx (Excel), but got "{ext}"'
         )
 
+    return df
 
-def get_model_config(model_file: Optional[str], index_file: Optional[str], manifest_file: Optional[str]) -> ModelConfig:
+
+def get_model_config(model_file: Optional[str], index_file: Optional[str], manifest_file: Optional[str], raw_dir: Optional[str]) -> ModelConfig:
     """Retrieves the model configuration for a given model name.
 
     Args:
@@ -46,7 +48,7 @@ def get_model_config(model_file: Optional[str], index_file: Optional[str], manif
 
     if model_file is not None:
         config.model = os.path.abspath(model_file)
-        model = parse_model_results(config.model)
+        model = parse_model_results(config.model, sort_labels_by_usage=True)
         config.max_syl = get_max_syllable(model)
     else:
         logging.warning("No model file provided, you are responsible for setting the following fields in the [model] section of the configuration:")
@@ -62,6 +64,12 @@ def get_model_config(model_file: Optional[str], index_file: Optional[str], manif
         logging.warning("No index file provided, you are responsible for setting the following fields in the [model] section of the configuration:")
         logging.warning(" - index: Path to the index file")
         logging.warning(" - groups: List of groups in the index")
+
+    if raw_dir is not None:
+        config.raw_data_path = os.path.abspath(raw_dir)
+    else:
+        logging.warning("No raw data directory provided, you are responsible for setting the following fields in the [model] section of the configuration:")
+        logging.warning(" - raw_data_path: Path to the raw data directory containing sessions")
 
 
     if manifest_file is not None:

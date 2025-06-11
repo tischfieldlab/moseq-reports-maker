@@ -11,6 +11,10 @@ from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 @dataclass
 class LabelMapConfig(BaseProducerArgs):
+    """Configuration for the `label_map` producer.
+
+    This has no additional parameters, as it simply writes the label_map.
+    """
     pass
 
 

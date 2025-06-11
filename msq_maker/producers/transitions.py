@@ -14,6 +14,10 @@ from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 @dataclass
 class TransitionsConfig(BaseProducerArgs):
+    """Configuration for the `transitions` producer.
+
+    This has no additional parameters, as it simply writes the transition probability values.
+    """
     pass
 
 

@@ -2,7 +2,7 @@ import logging
 import os
 import click
 
-from msq_maker.config import MoseqReportsConfig
+from msq_maker.config import MSQConfig, ModelConfig, MoseqReportsConfig
 from msq_maker.model import get_model_config
 from msq_maker.msq import MSQ
 from msq_maker.util import setup_logging
@@ -16,13 +16,14 @@ def cli():
     pass  # pylint: disable=unnecessary-pass
 
 
-@cli.command(name="generate-config", short_help="Generates a configuration file that holds editable options for producer parameters.")
+@cli.command(name="make-config", short_help="Generates a configuration file that holds editable options for producer parameters.")
 @click.option("--name", type=str, default="moseq-reports", help="Name of the generated report.")
 @click.option("--model", type=click.Path(), default=None, help="Path to a moseq model.")
 @click.option("--index", type=click.Path(), default=None, help="Path to a moseq index.")
+@click.option("--raw-data", type=click.Path(), default=None, help="Path to the directory containing your raw moseq session data.")
 @click.option("--manifest", type=click.Path(), default=None, help="Path to a manifest.")
 @click.option("--output-file", "-o", type=click.Path(), default="msq-config.toml", help="Path where configuration should be saved.")
-def generate_config(name, model, index, manifest, output_file: str):
+def make_config(name, model, index, raw_data, manifest, output_file: str):
     """Generates a configuration file for creating a moseq-reports msq file."""
     setup_logging()
     output_file = os.path.abspath(output_file)
@@ -36,7 +37,7 @@ def generate_config(name, model, index, manifest, output_file: str):
     config.msq.tmp_dir = os.path.join(output_dir, "tmp")
 
     # set model configuration
-    config.model = get_model_config(model, index, manifest)
+    config.model = get_model_config(model, index, manifest, raw_data)
 
     # finally, write the config file
     config.write_config(output_file)
@@ -59,19 +60,24 @@ def list_producers():
 @click.argument("producer", type=str, required=True)
 def explain_config(producer: str):
     setup_logging()
-    producer_class = PluginRegistry.registry.get(producer)
-    if producer_class is None:
-        logging.warning(f"Producer {producer} not found.")
-        return
 
-    # Assuming the producer has a method to explain its configuration
-    explanation = producer_class.get_args_type().document()
-    print(f"Configuration for {producer}:")
+    if producer == "model":
+        explanation = ModelConfig.document(name="Model")
+    elif producer == "msq":
+        explanation = MSQConfig.document(name="MSQ")
+    else:
+        producer_class = PluginRegistry.registry.get(producer)
+        if producer_class is None:
+            logging.warning(f"Producer {producer} not found.")
+            return
+
+        explanation = producer_class.get_args_type().document(name=producer)
+
     print(explanation)
 
 
 @cli.command(name="make-report", short_help="Generates a report using the specified producer.")
-@click.option("--config-file", "-c", type=click.Path(exists=True), default="msq-config.toml", help="Path to the configuration file.")
+@click.option("--config-file", "-c", type=click.Path(exists=True), default="msq-config.toml", required=True, help="Path to the configuration file.")
 def make_report(config_file: str):
     config = MoseqReportsConfig.read_config(config_file)
     msq = MSQ(config.msq)

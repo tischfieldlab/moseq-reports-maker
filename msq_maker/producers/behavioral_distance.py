@@ -12,6 +12,10 @@ from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 @dataclass
 class BehavioralDistanceConfig(BaseProducerArgs):
+    """Configuration for the `behavioral_distance` Producer.
+
+    You should not need to modify this configuration.
+    """
     distances: List[str] = field(default_factory=lambda: ["ar[init]", "ar[dtw]", "scalars", "pca[dtw]"], metadata={"doc": "List of distances to compute"})
 
 

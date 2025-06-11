@@ -11,6 +11,10 @@ from .base import BaseProducer, BaseProducerArgs, PluginRegistry
 
 @dataclass
 class ScalarsConfig(BaseProducerArgs):
+    """Configuration for the `scalars` producer.
+
+    This has no additional parameters, as it simply writes the scalar values.
+    """
     pass
 
 

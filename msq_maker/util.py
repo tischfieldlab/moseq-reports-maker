@@ -1,3 +1,4 @@
+from dataclasses import MISSING, Field
 import logging
 from typing import Dict, List, Optional
 from typing_extensions import TypedDict
@@ -48,6 +49,7 @@ def get_max_syllable(model: dict) -> int:
     for sid, use_count in syll_stats.items():
         if use_count == 0:
             return sid
+    return max(syll_stats.keys(), default=100)
 
 
 def get_groups_index(index_file: str) -> list:
@@ -143,3 +145,41 @@ def setup_logging(log_file: Optional[str] = None) -> None:
         file_formatter = logging.Formatter("{asctime} {levelname:8s} {message}", style="{")
         handler.setFormatter(file_formatter)
         logger.addHandler(handler)
+
+
+class SelfDocumentingMixin:
+    """Mixin to provide self-documenting capabilities for dataclasses."""
+
+    @classmethod
+    def document(cls, name: Optional[str] = None, indent: str = "  - ") -> str:
+        """Generate a documentation string for the producer."""
+        buffer = f"About the configuration for `{name if name is not None else cls.__name__}`\n\n"
+        buffer += f"    {cls.__doc__}\n\n"
+
+        buffer += "Configuration Items:\n"
+        if not hasattr(cls, "__dataclass_fields__"):
+            buffer += f"{indent}No configuration items available.\n"
+            return buffer
+
+        for attr_name in cls.__dataclass_fields__.keys():
+            attr: Field = cls.__dataclass_fields__[attr_name]
+            type_name: str
+            if isinstance(attr.type, type):
+                type_name = attr.type.__name__
+            else:
+                type_name = str(attr.type).replace("typing.", "")
+
+            # figure out the default value
+            # if the field uses a default_factory, we call it to get the default value
+            if attr.default is not MISSING and attr.default_factory is MISSING:
+                default_value = attr.default
+            elif attr.default is MISSING and attr.default_factory is not MISSING:
+                default_value = attr.default_factory()
+            else:
+                default_value = None
+
+            if type_name == "str":
+                default_value = f"\"{default_value}\""
+
+            buffer += f"{indent}{attr.name} ({type_name}): {attr.metadata.get('doc', '')} (default: {default_value})\n"
+        return buffer
