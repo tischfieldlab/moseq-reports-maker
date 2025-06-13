@@ -3,13 +3,16 @@ import logging
 import os
 import subprocess
 from dataclasses import dataclass, field
+import sys
 from typing import List, Tuple, Type, Union
+import psutil
 from typing_extensions import Literal
 
 import pandas as pd
 
 from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
+num_processors = psutil.cpu_count() if sys.platform == 'darwin' else len(psutil.Process().cpu_affinity())
 
 @dataclass
 class SyllableClipsConfig(BaseOptionalProducerArgs):
@@ -23,6 +26,8 @@ class SyllableClipsConfig(BaseOptionalProducerArgs):
     max_examples: int = field(default=10, metadata={"doc": "Maximum number of examples to show per syllable."})
     streams: List[str] = field(default_factory=list, metadata={"doc": "List of streams to include in the output. Available streams: depth, rgb, ir, composed, but may depend on the modalities used when acquiring the raw data."})
     rgb_crop: Union[Literal["none", "auto"], Tuple[int,int,int,int]] = field(default="auto", metadata={"doc": "Crop to apply to RGB clips. If 'none', no crop is applied. If 'auto', the crop is determined automatically based on the extracted data ROI (only works properly if depth and RGB are the same shape, typical for Kinect2 data). Otherwise, a tuple of (x1, y1, x2, y2) defining the crop region."})
+    processors: int = field(default=num_processors // 2, metadata={"doc": "Number of processors to use for parallel processing. Defaults to half the number of available CPU cores."})
+    extra_args: List[str] = field(default_factory=list, metadata={"doc": "Additional command line arguments to pass to the `syllable-clips` command, each token as an item in the list (à la subprocess style)."})
 
     def __post_init__(self):
         if len(self.streams) == 0:
@@ -52,6 +57,8 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
             "corpus-multiple",
             self.mconfig.index,
             self.mconfig.model,
+            "--processors",
+            str(self.pconfig.processors),
             "--dir",
             out_dir,
             "--name",
@@ -76,6 +83,9 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
 
         if self.mconfig.sort:
             syl_clip_args.append("--sort")
+
+        if self.pconfig.extra_args:
+            syl_clip_args.extend(self.pconfig.extra_args)
 
         subprocess.check_call(syl_clip_args)
 
