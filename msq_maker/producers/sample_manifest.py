@@ -4,8 +4,7 @@ from typing import Type
 from moseq2_viz.util import parse_index
 import pandas as pd
 
-from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, PluginRegistry
+from ..core import BaseProducer, BaseProducerArgs, PluginRegistry, MSQ
 
 
 @dataclass

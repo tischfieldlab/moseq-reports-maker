@@ -5,12 +5,11 @@ import subprocess
 from dataclasses import dataclass, field
 from typing import Type
 
-from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, PluginRegistry
+from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
 @dataclass
-class SpinogramsConfig(BaseProducerArgs):
+class SpinogramsConfig(BaseOptionalProducerArgs):
     """Configuration for the `spinogram` producer.
 
     This producer produces spinograms. For more specific information you can check the `moseq-spinogram` package.

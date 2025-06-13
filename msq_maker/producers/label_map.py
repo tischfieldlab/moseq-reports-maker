@@ -5,8 +5,7 @@ from typing import Type
 import pandas as pd
 
 from ..util import get_syllable_id_mapping
-from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, PluginRegistry
+from ..core import BaseProducer, BaseProducerArgs, PluginRegistry, MSQ
 
 
 @dataclass

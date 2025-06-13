@@ -6,12 +6,11 @@ from moseq2_viz.util import parse_index
 import pandas as pd
 
 from ..util import get_syllable_id_mapping, syllableMatricesToLongForm
-from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, PluginRegistry
+from ..core import MSQ, BaseOptionalProducerArgs, BaseProducer, PluginRegistry
 
 
 @dataclass
-class BehavioralDistanceConfig(BaseProducerArgs):
+class BehavioralDistanceConfig(BaseOptionalProducerArgs):
     """Configuration for the `behavioral_distance` Producer.
 
     You should not need to modify this configuration.

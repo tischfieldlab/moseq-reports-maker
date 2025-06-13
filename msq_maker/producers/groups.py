@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import Type
 
-from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, PluginRegistry
+from ..core import BaseProducer, BaseProducerArgs, PluginRegistry, MSQ
 
 
 

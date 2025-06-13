@@ -12,12 +12,11 @@ import numpy as np
 import pandas as pd
 
 from ..util import ensure_even
-from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, PluginRegistry
+from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
 @dataclass
-class CrowdMoviesConfig(BaseProducerArgs):
+class CrowdMoviesConfig(BaseOptionalProducerArgs):
     """Configuration for the `crowd_movies` producer."""
     raw_size: Union[Literal["auto"], Tuple[int, int]] = field(default="auto", metadata={"doc": "Size of the raw depth movie. If auto, will be estimated from the extraction metadata."})
     max_examples: int = field(default=40, metadata={"doc": "Maximum number of examples to show per syllable."})

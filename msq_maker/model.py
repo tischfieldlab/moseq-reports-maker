@@ -5,7 +5,7 @@ from moseq2_viz.model.util import parse_model_results
 from moseq2_viz.util import parse_index
 import pandas as pd
 
-from msq_maker.config import ModelConfig
+from msq_maker.core import ModelConfig
 from msq_maker.util import get_groups_index, get_max_syllable
 
 def parse_manifest(manifest_file: str) -> pd.DataFrame:

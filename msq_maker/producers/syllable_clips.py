@@ -8,12 +8,11 @@ from typing_extensions import Literal
 
 import pandas as pd
 
-from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, PluginRegistry
+from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
 @dataclass
-class SyllableClipsConfig(BaseProducerArgs):
+class SyllableClipsConfig(BaseOptionalProducerArgs):
     """Configuration for the `syllable_clips` producer.
 
     This producer produces syllable clips, or syllable-locked videos in RGB, depth, IR, or composed.

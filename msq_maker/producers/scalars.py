@@ -5,12 +5,11 @@ from typing import Type
 from moseq2_viz.scalars.util import scalars_to_dataframe
 from moseq2_viz.util import parse_index
 
-from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, PluginRegistry
+from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
 @dataclass
-class ScalarsConfig(BaseProducerArgs):
+class ScalarsConfig(BaseOptionalProducerArgs):
     """Configuration for the `scalars` producer.
 
     This has no additional parameters, as it simply writes the scalar values.

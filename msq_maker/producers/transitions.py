@@ -8,12 +8,11 @@ from moseq2_viz.model.util import parse_model_results
 import pandas as pd
 
 from ..util import get_syllable_id_mapping, syllableMatricesToLongForm
-from ..msq import MSQ
-from .base import BaseProducer, BaseProducerArgs, PluginRegistry
+from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
 @dataclass
-class TransitionsConfig(BaseProducerArgs):
+class TransitionsConfig(BaseOptionalProducerArgs):
     """Configuration for the `transitions` producer.
 
     This has no additional parameters, as it simply writes the transition probability values.

@@ -1,17 +1,18 @@
-from dataclasses import MISSING, Field
 import logging
-from typing import Dict, List, Optional
+from typing import Dict
+import warnings
 from typing_extensions import TypedDict
 from moseq2_viz.model.util import parse_model_results, relabel_by_usage, get_syllable_statistics
 from moseq2_viz.util import parse_index
 
 
-LabelMap = TypedDict('LabelMap', {
+LabelMapping = TypedDict('LabelMapping', {
     'raw': int,
     'usage': int,
     'frames': int,
 })
-def get_syllable_id_mapping(model_file: str) -> List[LabelMap]:
+LabelMap = Dict[int, LabelMapping]
+def get_syllable_id_mapping(model_file: str) -> LabelMap:
     ''' Gets a mapping of syllable IDs
 
     Parameters:
@@ -21,19 +22,20 @@ def get_syllable_id_mapping(model_file: str) -> List[LabelMap]:
         list of dicts, each dict contains raw, usage, and frame ID assignments
     '''
     mdl = parse_model_results(model_file, sort_labels_by_usage=False)
-    labels_usage = relabel_by_usage(mdl['labels'], count='usage')[0]
-    labels_frames = relabel_by_usage(mdl['labels'], count='frames')[0]
+    labels_usage = relabel_by_usage(mdl['labels'], count='usage')[1]
+    labels_frames = relabel_by_usage(mdl['labels'], count='frames')[1]
 
-    label_map: Dict[int, LabelMap] = {}
-    for si, sl in enumerate(mdl['labels']):
-        for i, l in enumerate(sl):
-            if l not in label_map:
-                label_map[l] = {
-                    'raw': l,
-                    'usage': labels_usage[si][i],
-                    'frames': labels_frames[si][i]
-                }
-    return list(label_map.values())
+    available_ids = list(set(labels_usage + labels_frames))
+    label_map: LabelMap = {i: {'raw': i, 'usage': -1, 'frames': -1} for i in available_ids}
+    label_map[-5] = {'raw': -5, 'usage': -5, 'frames': -5}  # -5 is the "unknown" label
+
+    for usage_id, raw_id in enumerate(labels_usage):
+        label_map[raw_id]['usage'] = usage_id
+
+    for frames_id, raw_id in enumerate(labels_frames):
+        label_map[raw_id]['frames'] = frames_id
+
+    return label_map
 
 
 def get_max_syllable(model: dict) -> int:
@@ -45,11 +47,11 @@ def get_max_syllable(model: dict) -> int:
     Returns:
         int: The maximum syllable value.
     """
-    syll_stats = get_syllable_statistics(model["labels"])[0]
-    for sid, use_count in syll_stats.items():
+    syllable_stats = get_syllable_statistics(model["labels"])[0]
+    for sid, use_count in syllable_stats.items():
         if use_count == 0:
             return sid
-    return max(syll_stats.keys(), default=100)
+    return max(syllable_stats.keys(), default=100)
 
 
 def get_groups_index(index_file: str) -> list:
@@ -79,22 +81,16 @@ def get_max_states(model_file: str) -> int:
     return model['run_parameters']['max_states']
 
 
-def syllableMatricesToLongForm(mats_dict, mapping: List[LabelMap], decorate=None):
+def syllableMatricesToLongForm(mats_dict, mapping: LabelMap, decorate=None):
     # assumes mats are indexed by RAW ID!!!
 
     shape = mats_dict[list(mats_dict.keys())[0]].shape
     data = []
     for i in range(shape[0]):
-        i_matching = list(filter(lambda row: row["raw"] == i, mapping))
-        if len(i_matching) == 0:
-            continue
-        i_map = i_matching[0]
+        i_map = mapping[i]
 
         for j in range(shape[1]):
-            j_matching = list(filter(lambda row: row["raw"] == j, mapping))
-            if len(j_matching) == 0:
-                continue
-            j_map = j_matching[0]
+            j_map = mapping[j]
 
             data.append({
                 "row_id_raw": i_map["raw"],
@@ -124,9 +120,10 @@ def ensure_even(num: int):
         return num
 
 
-def setup_logging(log_file: Optional[str] = None) -> None:
-    logging.captureWarnings(True)
 
+logger: logging.Logger
+def setup_logging() -> None:
+    global logger
     logger = logging.getLogger(None)
     logger.handlers.clear()
     logger.setLevel(logging.INFO)
@@ -138,48 +135,10 @@ def setup_logging(log_file: Optional[str] = None) -> None:
     console.setFormatter(console_formatter)
     logger.addHandler(console)
 
+def add_file_logging(log_file: str) -> None:
     # file handler
-    if log_file is not None:
-        handler = logging.FileHandler(log_file, mode="w")
-        handler.setLevel(logging.INFO)
-        file_formatter = logging.Formatter("{asctime} {levelname:8s} {message}", style="{")
-        handler.setFormatter(file_formatter)
-        logger.addHandler(handler)
-
-
-class SelfDocumentingMixin:
-    """Mixin to provide self-documenting capabilities for dataclasses."""
-
-    @classmethod
-    def document(cls, name: Optional[str] = None, indent: str = "  - ") -> str:
-        """Generate a documentation string for the producer."""
-        buffer = f"About the configuration for `{name if name is not None else cls.__name__}`\n\n"
-        buffer += f"    {cls.__doc__}\n\n"
-
-        buffer += "Configuration Items:\n"
-        if not hasattr(cls, "__dataclass_fields__"):
-            buffer += f"{indent}No configuration items available.\n"
-            return buffer
-
-        for attr_name in cls.__dataclass_fields__.keys():
-            attr: Field = cls.__dataclass_fields__[attr_name]
-            type_name: str
-            if isinstance(attr.type, type):
-                type_name = attr.type.__name__
-            else:
-                type_name = str(attr.type).replace("typing.", "")
-
-            # figure out the default value
-            # if the field uses a default_factory, we call it to get the default value
-            if attr.default is not MISSING and attr.default_factory is MISSING:
-                default_value = attr.default
-            elif attr.default is MISSING and attr.default_factory is not MISSING:
-                default_value = attr.default_factory()
-            else:
-                default_value = None
-
-            if type_name == "str":
-                default_value = f"\"{default_value}\""
-
-            buffer += f"{indent}{attr.name} ({type_name}): {attr.metadata.get('doc', '')} (default: {default_value})\n"
-        return buffer
+    handler = logging.FileHandler(log_file, mode="w")
+    handler.setLevel(logging.INFO)
+    file_formatter = logging.Formatter("{asctime} {levelname:8s} {message}", style="{")
+    handler.setFormatter(file_formatter)
+    logger.addHandler(handler)
