@@ -86,7 +86,7 @@ class CrowdMoviesProducer(BaseProducer[CrowdMoviesConfig]):
         ]
         if self.pconfig.processes is not None:
             args.extend(["--processes", str(self.pconfig.processes)])
-        subprocess.call(args)
+        subprocess.check_call(args)
         logging.info("Completed creating crowd movies at {}\n".format(out_dir))
 
     def estimate_crowd_movie_size(self, padding=100):

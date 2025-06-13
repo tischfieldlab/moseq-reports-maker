@@ -77,7 +77,7 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
         if self.mconfig.sort:
             syl_clip_args.append("--sort")
 
-        subprocess.call(syl_clip_args)
+        subprocess.check_call(syl_clip_args)
 
         args_path = os.path.join(out_dir, "{}.args.json".format(basename))
         with open(args_path) as args_file:

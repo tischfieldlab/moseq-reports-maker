@@ -53,6 +53,6 @@ class SpinogramsProducer(BaseProducer[SpinogramsConfig]):
         ]
         if self.mconfig.sort:
             spinogram_args.append("--sort")
-        subprocess.call(spinogram_args)
+        subprocess.check_call(spinogram_args)
 
         msq.manifest["spinograms"] = out_name
