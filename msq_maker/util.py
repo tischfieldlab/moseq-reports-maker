@@ -1,6 +1,8 @@
 import logging
+import sys
 from typing import Dict
 import warnings
+import psutil
 from typing_extensions import TypedDict
 from moseq2_viz.model.util import parse_model_results, relabel_by_usage, get_syllable_statistics
 from moseq2_viz.util import parse_index
@@ -118,6 +120,20 @@ def ensure_even(num: int):
         return num + 1
     else:
         return num
+
+
+def get_cpu_count() -> int:
+    """Get the number of available CPUs cores.
+
+    On systems that support CPU affinity, this will return the number of CPUs available to the current process.
+
+    Returns:
+        int: The number of CPUs, adjusted to be even.
+    """
+    if sys.platform == 'darwin':
+        return psutil.cpu_count(logical=True)
+    else:
+        return len(psutil.Process().cpu_affinity())
 
 
 

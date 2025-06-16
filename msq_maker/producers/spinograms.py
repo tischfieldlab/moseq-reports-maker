@@ -5,6 +5,7 @@ import subprocess
 from dataclasses import dataclass, field
 from typing import Type
 
+from ..util import get_cpu_count
 from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
@@ -15,6 +16,7 @@ class SpinogramsConfig(BaseOptionalProducerArgs):
     This producer produces spinograms. For more specific information you can check the `moseq-spinogram` package.
     """
     max_examples: int = field(default=10, metadata={"doc": "Maximum number of examples to generate for each syllable."})
+    processors: int = field(default=get_cpu_count() // 2, metadata={"doc": "Number of processors to use for parallel processing. Defaults to half the number of available CPU cores."})
 
 
 @PluginRegistry.register("spinograms")
@@ -50,6 +52,8 @@ class SpinogramsProducer(BaseProducer[SpinogramsConfig]):
             self.mconfig.count,
             "--max-examples",
             str(self.pconfig.max_examples),
+            "--processors",
+            str(self.pconfig.processors),
         ]
         if self.mconfig.sort:
             spinogram_args.append("--sort")
