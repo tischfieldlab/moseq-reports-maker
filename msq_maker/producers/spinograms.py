@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 from dataclasses import dataclass, field
-from typing import Type
+from typing import List, Type
 
 from ..util import get_cpu_count
 from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
@@ -17,6 +17,8 @@ class SpinogramsConfig(BaseOptionalProducerArgs):
     """
     max_examples: int = field(default=10, metadata={"doc": "Maximum number of examples to generate for each syllable."})
     processors: int = field(default=get_cpu_count() // 2, metadata={"doc": "Number of processors to use for parallel processing. Defaults to half the number of available CPU cores."})
+    extra_args: List[str] = field(default_factory=list, metadata={"doc": "Additional command line arguments to pass to the `spinograms` command, each token as an item in the list (à la subprocess style)."})
+
 
 
 @PluginRegistry.register("spinograms")
@@ -57,6 +59,10 @@ class SpinogramsProducer(BaseProducer[SpinogramsConfig]):
         ]
         if self.mconfig.sort:
             spinogram_args.append("--sort")
+
+        if self.pconfig.extra_args:
+            spinogram_args.extend(self.pconfig.extra_args)
+
         subprocess.check_call(spinogram_args)
 
         msq.manifest["spinograms"] = out_name
