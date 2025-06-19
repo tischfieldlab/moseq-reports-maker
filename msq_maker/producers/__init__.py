@@ -1,5 +1,6 @@
 from .behavioral_distance import BehavioralDistanceProducer, BehavioralDistanceConfig
 from .crowd_movies import CrowdMoviesProducer, CrowdMoviesConfig
+from .entropy import EntropyProducer, EntropyConfig
 from .groups import GroupsProducer, GroupsConfig
 from .label_map import LabelMapProducer, LabelMapConfig
 from .sample_manifest import SampleManifestProducer, SampleManifestConfig

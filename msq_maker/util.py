@@ -1,9 +1,8 @@
 import logging
 import sys
-from typing import Dict
-import warnings
+from typing import Dict, Union
 import psutil
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, Literal
 from moseq2_viz.model.util import parse_model_results, relabel_by_usage, get_syllable_statistics
 from moseq2_viz.util import parse_index
 
@@ -15,13 +14,13 @@ LabelMapping = TypedDict('LabelMapping', {
 })
 LabelMap = Dict[int, LabelMapping]
 def get_syllable_id_mapping(model_file: str) -> LabelMap:
-    ''' Gets a mapping of syllable IDs
+    '''Gets a mapping of syllable IDs.
 
     Parameters:
         model_file (str): path to a model to interrogate
 
     Returns:
-        list of dicts, each dict contains raw, usage, and frame ID assignments
+        dict of dicts, indexed by raw id, with each sub-dict contains raw, usage, and frame ID assignments
     '''
     mdl = parse_model_results(model_file, sort_labels_by_usage=False)
     labels_usage = relabel_by_usage(mdl['labels'], count='usage')[1]
@@ -38,6 +37,22 @@ def get_syllable_id_mapping(model_file: str) -> LabelMap:
         label_map[raw_id]['frames'] = frames_id
 
     return label_map
+
+
+def reindex_label_map(label_map: LabelMap, by: Literal['usage', 'frames', 'raw']) -> LabelMap:
+    ''' Reindex a label map by usage, frames, or raw ID
+
+    Parameters:
+        label_map (LabelMap): The label map to reindex
+        by (str): The key to reindex by, one of {'usage', 'frames', 'raw'}
+
+    Returns:
+        LabelMap: A new label map indexed by the specified key
+    '''
+    if by not in ['usage', 'frames', 'raw']:
+        raise ValueError(f"Invalid index type '{by}'. Must be one of ['usage', 'frames', 'raw']")
+
+    return {itm[by]: itm for itm in label_map.values()}
 
 
 def get_max_syllable(model: dict) -> int:
@@ -69,7 +84,7 @@ def get_groups_index(index_file: str) -> list:
     return list(sorted(set([f["group"] for f in index["files"]])))
 
 
-def get_max_states(model_file: str) -> int:
+def get_max_states(model: Union[str, dict]) -> int:
     ''' Gets the maximum number of states parameter from model training.
         This corresponds to the `--max-states` parameter from `moseq2-model learn-model` command.
 
@@ -79,8 +94,17 @@ def get_max_states(model_file: str) -> int:
         Returns:
             int: max number of states parameter from model training
     '''
-    model = parse_model_results(model_file)
-    return model['run_parameters']['max_states']
+    if isinstance(model, str):
+        model_dict = parse_model_results(model)
+    elif isinstance(model, dict):
+        model_dict = model
+    else:
+        raise ValueError("model must be a path to a model file or a parsed model dictionary")
+
+    try:
+        return model_dict['run_parameters']['max_states']
+    except KeyError:
+        return 100  # default value if not found in model
 
 
 def syllableMatricesToLongForm(mats_dict, mapping: LabelMap, decorate=None):
