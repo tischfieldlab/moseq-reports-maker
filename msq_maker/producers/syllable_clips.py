@@ -46,10 +46,11 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
         return SyllableClipsConfig
 
     def run(self, msq: MSQ):
-        out_dir = os.path.join(msq.spool_path, "syllable_clips")
-        os.makedirs(out_dir, exist_ok=True)
+        rel_out_dir = "syllable_clips"
+        abs_out_dir = os.path.join(msq.spool_path, rel_out_dir)
+        os.makedirs(abs_out_dir, exist_ok=True)
         basename = "syllable"
-        logging.info("Creating syllable clips at {}\n".format(out_dir))
+        logging.info("Creating syllable clips at {}\n".format(abs_out_dir))
         syl_clip_args = [
             "syllable-clips",
             "corpus-multiple",
@@ -58,7 +59,7 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
             "--processors",
             str(self.pconfig.processors),
             "--dir",
-            out_dir,
+            abs_out_dir,
             "--name",
             basename,
             "--count",
@@ -87,12 +88,12 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
 
         subprocess.check_call(syl_clip_args)
 
-        args_path = os.path.join(out_dir, "{}.args.json".format(basename))
+        args_path = os.path.join(abs_out_dir, "{}.args.json".format(basename))
         with open(args_path) as args_file:
             args_data = json.load(args_file)
 
-        man_path = os.path.join(out_dir, "{}.sources.tsv".format(basename))
+        man_path = os.path.join(abs_out_dir, "{}.sources.tsv".format(basename))
         man_df = pd.read_csv(man_path, sep="\t")
-        man_df["base_name"] = man_df["base_name"].apply(lambda x: os.path.join(out_dir, x))
+        man_df["base_name"] = man_df["base_name"].apply(lambda x: os.path.join(rel_out_dir, x))
         out = {"args": args_data, "manifest": man_df.to_dict("records")}
         msq.manifest["syllable_clips"] = out
