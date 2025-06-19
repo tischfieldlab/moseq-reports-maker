@@ -43,7 +43,8 @@ class BehavioralDistanceProducer(BaseProducer[BehavioralDistanceConfig]):
         df_dict = syllableMatricesToLongForm(dist, syllable_mapping)
 
         df = pd.DataFrame.from_dict(data=df_dict)
-        #df = df[df["id_usage"] <= self.mconfig.max_syl]
+        df = df[(df["row_id_usage"] < self.mconfig.max_syl) & (df["col_id_usage"] < self.mconfig.max_syl)]
+
         dest = "behaveDistances.ms{}.json".format(self.mconfig.max_syl)
         msq.write_dataframe(dest, df)
         msq.manifest["behave_dist"] = dest

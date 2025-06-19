@@ -7,7 +7,7 @@ from moseq2_viz.model.trans_graph import get_transition_matrix
 from moseq2_viz.model.util import parse_model_results
 import pandas as pd
 
-from ..util import get_syllable_id_mapping, syllableMatricesToLongForm
+from ..util import get_max_states, get_syllable_id_mapping, syllableMatricesToLongForm
 from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
@@ -30,19 +30,21 @@ class TransitionsProducer(BaseProducer[TransitionsConfig]):
     def run(self, msq: MSQ):
         _, sorted_index = parse_index(self.mconfig.index)
         model = parse_model_results(self.mconfig.model, sort_labels_by_usage=False, count="usage")
+        max_syllable = get_max_states(model)
         syllable_mapping = get_syllable_id_mapping(self.mconfig.model)
 
         label_uuids = model["keys"]
         labels = model["labels"]
 
         trans_mats = {}
-        trans_mats["raw"] = get_transition_matrix(labels, combine=False, normalize=None, max_syllable=self.mconfig.max_syl)
+        trans_mats["raw"] = get_transition_matrix(labels, combine=False, normalize=None, max_syllable=max_syllable)
 
         transitions = Parallel(n_jobs=-1)(
             delayed(self._prepTransitionsForIndividual)(trans_mats, i, uuid, sorted_index, syllable_mapping) for i, uuid in enumerate(label_uuids)
         )
 
-        df = pd.concat(transitions, ignore_index=True)
+        df: pd.DataFrame = pd.concat(transitions, ignore_index=True)
+        df = df[(df["row_id_usage"] < self.mconfig.max_syl) & (df["col_id_usage"] < self.mconfig.max_syl)]
 
         dest = "individual_transitions.ms{}.json".format(self.mconfig.max_syl)
         msq.write_dataframe(dest, df)

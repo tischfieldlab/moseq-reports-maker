@@ -6,7 +6,7 @@ from moseq2_viz.util import parse_index
 import numpy as np
 import pandas as pd
 
-from ..util import get_syllable_id_mapping
+from ..util import get_max_states, get_syllable_id_mapping
 from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
@@ -28,6 +28,7 @@ class UsageProducer(BaseProducer[UsageConfig]):
     def run(self, msq: MSQ):
         _, index_dict = parse_index(self.mconfig.index)
         model_dict = parse_model_results(self.mconfig.model, sort_labels_by_usage=False)
+        max_syllable = get_max_states(model_dict)
 
         if "train_list" in model_dict.keys():
             label_uuids = model_dict["train_list"]
@@ -39,21 +40,24 @@ class UsageProducer(BaseProducer[UsageConfig]):
 
         data = []
         for i, label_arr in enumerate(model_dict["labels"]):
-            tmp_usages, _ = get_syllable_statistics(label_arr, count="usage", max_syllable=self.mconfig.max_syl)
+            tmp_usages, _ = get_syllable_statistics(label_arr, count="usage", max_syllable=max_syllable)
             total_usage = np.sum(list(tmp_usages.values()))
 
-            tmp_frames, _ = get_syllable_statistics(label_arr, count="frames", max_syllable=self.mconfig.max_syl)
+            tmp_frames, _ = get_syllable_statistics(label_arr, count="frames", max_syllable=max_syllable)
             total_frames = np.sum(list(tmp_frames.values()))
 
-            for s in range(self.mconfig.max_syl):
-                syllable = syllable_mapping[s]
+            for j, (usage, frames) in enumerate(zip(tmp_usages.values(), tmp_frames.values())):
+                syllable = syllable_mapping[j]
+
+                if syllable['usage'] > self.mconfig.max_syl:
+                    continue
 
                 data.append({
                     "id_raw": syllable["raw"],
                     "id_usage": syllable["usage"],
                     "id_frames": syllable["frames"],
-                    "usage_usage": tmp_usages[s] / total_usage,
-                    "usage_frames": tmp_frames[s] / total_frames,
+                    "usage_usage": usage / total_usage,
+                    "usage_frames": frames / total_frames,
                     "uuid": label_uuids[i],
                     "group": groups[i],
                 })
