@@ -2,6 +2,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import MISSING, Field, dataclass, field, asdict
 import json
 import os
+import shutil
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, cast
 import zipfile
 
@@ -111,6 +112,7 @@ class MSQConfig(SelfDocumentingMixin):
     out_dir: str = field(default=os.getcwd(), metadata={"doc": "Output directory for the report"})
     tmp_dir: str = field(default=os.path.join(os.getcwd(), "tmp"), metadata={"doc": "Temporary directory for intermediate files"})
     ext: str = field(default="msq", metadata={"doc": "File extension for the final output file"})
+    cleanup: bool = field(default=True, metadata={"doc": "Whether to clean up the temporary directory after the report is generated. If set to False, the temporary files will be kept for debugging purposes."})
 
 
 @dataclass
@@ -184,6 +186,15 @@ class MSQ:
                 arcname = os.path.join(os.path.relpath(root, self.spool_path), file)
                 zip.write(os.path.join(root, file), arcname=arcname)
         zip.close()
+
+    def post(self):
+        # Clean up the temporary directory if configured to do so
+        if self.config.cleanup:
+            try:
+                shutil.rmtree(self.spool_path)
+                print(f"Directory '{self.spool_path}' and its contents removed successfully.")
+            except OSError as e:
+                print(f"Error: {e.filename} - {e.strerror}.")
 
     def write_dataframe(self, name: str, data: pd.DataFrame):
         # Write the data to a DataFrame

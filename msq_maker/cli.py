@@ -116,6 +116,7 @@ def explain_config(producer: str):
 def make_report(config_file: str):
     config = MoseqReportsConfig.read_config(config_file)
     msq = MSQ(config.msq)
+    msq.prepare()
     msq.write_unstructured("msq_config.json", config.to_dict())
     msq.manifest["msq_config"] = "msq_config.json"
 
@@ -145,6 +146,7 @@ def make_report(config_file: str):
     logging.info("Bundling report...")
     msq.bundle()
     logging.info(f"Report generated at {msq.report_path}.")
+    msq.post()
     logging.info("Report generation complete.")
 
     if len(errors) > 0:
