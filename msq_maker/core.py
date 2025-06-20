@@ -39,7 +39,7 @@ class SelfDocumentingMixin:
                 if isinstance(attr.type, type):
                     type_name = attr.type.__name__
                 else:
-                    type_name = str(attr.type).replace("typing.", "")
+                    type_name = str(attr.type).replace("typing.", "").replace("typing_extensions.", "")
 
                 # figure out the default value
                 # if the field uses a default_factory, we call it to get the default value
