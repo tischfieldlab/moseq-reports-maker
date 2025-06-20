@@ -3,11 +3,12 @@ import logging
 import os
 import subprocess
 from dataclasses import dataclass, field
-from typing import Tuple, Type, Union
+from typing import Any, Dict, List, Tuple, Type, Union
 from typing_extensions import Literal
 
 import h5py
 from moseq2_viz.util import parse_index
+from moseq2_viz.helpers.wrappers import make_crowd_movies_wrapper
 import numpy as np
 import pandas as pd
 
@@ -26,6 +27,18 @@ class CrowdMoviesConfig(BaseOptionalProducerArgs):
     min_height: int = field(default=5, metadata={"doc": "Minimum height for scaling videos."})
     max_height: int = field(default=80, metadata={"doc": "Maximum height for scaling videos."})
     cmap: str = field(default="jet", metadata={"doc": "Color map to use for depth movies."})
+    separate_by: Literal['default', 'groups', 'sessions', 'subjects'] = field(default='default', metadata={"doc": "Generate crowd movies by specified grouping."})
+    specific_syllable: Union[int, None] = field(default=None, metadata={"doc": "Index of the specific syllable to render."})
+    session_names: List[str] = field(default_factory=list, metadata={"doc": "Specific sessions to create crowd movies from."})
+    scale: float = field(default=1.0, metadata={"doc": "Scaling from pixel units to mm."})
+    max_dur: Union[int, None] = field(default=60, metadata={"doc": "Exclude syllables longer than this number of frames (None for no limit)."})
+    min_dur: int = field(default=0, metadata={"doc": "Exclude syllables shorter than this number of frames."})
+    legacy_jitter_fix: bool = field(default=False, metadata={"doc": "Set to true if you notice jitter in your crowd movies."})
+    frame_path: str = field(default="frames", metadata={"doc": "Path to depth frames in h5 file."})
+    progress_bar: bool = field(default=False, metadata={"doc": "Show verbose progress bars."})
+    pad: int = field(default=30, metadata={"doc": "Pad crowd movie videos with this many frames."})
+    seed: int = field(default=0, metadata={"doc": "Defines random seed for selecting syllable instances to plot."})
+
 
 @PluginRegistry.register("crowd_movies")
 class CrowdMoviesProducer(BaseProducer[CrowdMoviesConfig]):
@@ -52,41 +65,39 @@ class CrowdMoviesProducer(BaseProducer[CrowdMoviesConfig]):
 
         logging.info("Creating crowd movies at {}\n".format(out_dir))
         raw_size = self.estimate_crowd_movie_size()
-        args = [
-            "moseq2-viz",
-            "make-crowd-movies",
+        crowd_movies_config = {
+            "max_syllable": self.config.model.max_syl,
+            "max_examples": self.pconfig.max_examples,
+            "processes": self.pconfig.processes,
+            "separate_by": self.pconfig.separate_by,
+            "specific_syllable": self.pconfig.specific_syllable,
+            "session_names": self.pconfig.session_names,
+            "sort": self.config.model.sort,
+            "count": self.config.model.count,
+            "gaussfilter_space": self.pconfig.gaussfilter_space,
+            "medfilter_space": self.pconfig.medfilter_space,
+            "min_height": self.pconfig.min_height,
+            "max_height": self.pconfig.max_height,
+            "raw_size": raw_size,
+            "scale": self.pconfig.scale,
+            "cmap": self.pconfig.cmap,
+            "max_dur": self.pconfig.max_dur,
+            "min_dur": self.pconfig.min_dur,
+            "legacy_jitter_fix": self.pconfig.legacy_jitter_fix,
+            "frame_path": self.pconfig.frame_path,
+            "progress_bar": self.pconfig.progress_bar,
+            "pad": self.pconfig.pad,
+            "seed": self.pconfig.seed,
+
+        }
+
+        make_crowd_movies_wrapper(
             self.config.model.index,
             self.config.model.model,
-            "--max-syllable",
-            str(self.config.model.max_syl),
-            "--output-dir",
             out_dir,
-            "--sort",
-            str(self.config.model.sort),
-            "--count",
-            self.config.model.count,
-            "--raw-size",
-            str(raw_size[0]),
-            str(raw_size[1]),
-            "--max-examples",
-            str(self.pconfig.max_examples),
-            "--gaussfilter-space",
-            str(self.pconfig.gaussfilter_space[0]),
-            str(self.pconfig.gaussfilter_space[1]),
-            "--medfilter-space",
-            str(self.pconfig.medfilter_space),
-            "--min-height",
-            str(self.pconfig.min_height),
-            "--max-height",
-            str(self.pconfig.max_height),
-            "--cmap",
-            self.pconfig.cmap,
-            "--max-examples",
-            str(self.pconfig.max_examples),
-        ]
-        if self.pconfig.processes is not None:
-            args.extend(["--processes", str(self.pconfig.processes)])
-        subprocess.check_call(args)
+            crowd_movies_config
+        )
+
         logging.info("Completed creating crowd movies at {}\n".format(out_dir))
 
     def estimate_crowd_movie_size(self, padding=100):
@@ -107,5 +118,3 @@ class CrowdMoviesProducer(BaseProducer[CrowdMoviesConfig]):
                     })
             bounds = pd.DataFrame(bounds).median()
             return (ensure_even(int(bounds['width'] + padding)), ensure_even(int(bounds['height'] + padding)))
-    
-    
