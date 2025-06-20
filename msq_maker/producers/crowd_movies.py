@@ -18,7 +18,7 @@ from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 @dataclass
 class CrowdMoviesConfig(BaseOptionalProducerArgs):
-    """Configuration for the `crowd_movies` producer."""
+    """Configuration for the `crowd_movies` producer, implemented by the moseq2-viz package."""
     raw_size: Union[Literal["auto"], Tuple[int, int]] = field(default="auto", metadata={"doc": "Size of the raw depth movie. If auto, will be estimated from the extraction metadata."})
     max_examples: int = field(default=40, metadata={"doc": "Maximum number of examples to show per syllable."})
     processes: Union[int, None] = field(default=None, metadata={"doc": "Number of processes to use for creating movies."})
