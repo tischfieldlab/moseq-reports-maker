@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional
+from typing import List, Optional
 from moseq2_viz.model.util import parse_model_results
 from moseq2_viz.util import parse_index
 import pandas as pd
@@ -34,7 +34,7 @@ def parse_manifest(manifest_file: str) -> pd.DataFrame:
     return df
 
 
-def get_model_config(model_file: Optional[str], index_file: Optional[str], manifest_file: Optional[str], raw_dir: Optional[str]) -> ModelConfig:
+def get_model_config(model_file: Optional[str], index_file: Optional[str], manifest_file: Optional[str], raw_dir: Optional[str], groups: Optional[List[str]]) -> ModelConfig:
     """Retrieves the model configuration for a given model name.
 
     Args:
@@ -59,7 +59,23 @@ def get_model_config(model_file: Optional[str], index_file: Optional[str], manif
     if index_file is not None:
         config.index = os.path.abspath(index_file)
         index, _ = parse_index(config.index)
-        config.groups = get_groups_index(config.index)
+        available_groups = get_groups_index(config.index)
+        if groups is not None:
+            logging.info("Groups were supplied")
+            actual_groups = []
+            for g in groups:
+                if g not in available_groups:
+                    logging.warning(f"  - Omitting group \"{g}\" because it was not found in the index!")
+                    continue
+                actual_groups.append(g)
+            diff = set(available_groups) - set(actual_groups)
+            if len(diff) > 0:
+                logging.warning(f"The following groups from the index were excluded because the user omitted them:")
+                for g in diff:
+                    logging.warning(f"  - {g}")
+            config.groups = [g for g in groups if g in available_groups]
+        else:
+            config.groups = available_groups
     else:
         logging.warning("No index file provided, you are responsible for setting the following fields in the [model] section of the configuration:")
         logging.warning(" - index: Path to the index file")

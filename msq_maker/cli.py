@@ -27,11 +27,12 @@ def cli():
 @click.option("--index", type=click.Path(exists=True, dir_okay=False), default=None, help="Path to a moseq index.")
 @click.option("--raw-data", type=click.Path(exists=True, file_okay=False), default=None, help="Path to the directory containing your raw moseq session data.")
 @click.option("--manifest", type=click.Path(exists=True, dir_okay=False), default=None, help="Path to a manifest.")
+@click.option("--group", "-g", type=str, multiple=True, help="Groups to include, if not specified, all groups will be included.")
 @click.option("--output-file", "-o", type=click.Path(), default="msq-config.toml", help="Path where configuration should be saved.")
 @click.option("--disable-all", type=bool, is_flag=True, help="Disable all producers.")
 @click.option("--enable", type=click.Choice(PluginRegistry.registered_optional()), multiple=True, help="Enable specific producers by name. Use this to include only the producers you want in the report.")
 @click.option("--disable", type=click.Choice(PluginRegistry.registered_optional()), multiple=True, help="Disable specific producers by name. Use this to skip producers you do not want in the report.")
-def make_config(name: str, model: str, index: str, raw_data: str, manifest: str, output_file: str, disable_all: bool, enable: List[str], disable: List[str]):
+def make_config(name: str, model: str, index: str, raw_data: str, manifest: str, group: List[str], output_file: str, disable_all: bool, enable: List[str], disable: List[str]):
     """Generates a configuration file for creating a moseq-reports msq file."""
     output_file = os.path.abspath(output_file)
 
@@ -44,7 +45,7 @@ def make_config(name: str, model: str, index: str, raw_data: str, manifest: str,
     config.msq.tmp_dir = os.path.join(output_dir, "tmp")
 
     # set model configuration
-    config.model = get_model_config(model, index, manifest, raw_data)
+    config.model = get_model_config(model, index, manifest, raw_data, group)
 
     if disable_all:
         for producer_name, producer_config in config.producers.items():
