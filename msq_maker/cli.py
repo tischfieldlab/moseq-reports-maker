@@ -27,14 +27,17 @@ def cli():
 @click.option("--index", type=click.Path(exists=True, dir_okay=False), default=None, help="Path to a moseq index.")
 @click.option("--raw-data", type=click.Path(exists=True, file_okay=False), default=None, help="Path to the directory containing your raw moseq session data.")
 @click.option("--manifest", type=click.Path(exists=True, dir_okay=False), default=None, help="Path to a manifest.")
+@click.option("--manifest-uuid-col", type=str, default="UUID", help="Column name in the manifest file that contains the UUIDs of the extractions.")
+@click.option("--manifest-session-id-col", type=str, default="Session_ID", help="Column name in the manifest file that contains the session IDs (i.e. `session_*`).")
 @click.option("--group", "-g", type=str, multiple=True, help="Groups to include, if not specified, all groups will be included.")
 @click.option("--output-file", "-o", type=click.Path(), default="msq-config.toml", help="Path where configuration should be saved.")
 @click.option("--disable-all", type=bool, is_flag=True, help="Disable all producers.")
 @click.option("--enable", type=click.Choice(PluginRegistry.registered_optional()), multiple=True, help="Enable specific producers by name. Use this to include only the producers you want in the report.")
 @click.option("--disable", type=click.Choice(PluginRegistry.registered_optional()), multiple=True, help="Disable specific producers by name. Use this to skip producers you do not want in the report.")
-def make_config(name: str, model: str, index: str, raw_data: str, manifest: str, group: List[str], output_file: str, disable_all: bool, enable: List[str], disable: List[str]):
+def make_config(name: str, model: str, index: str, raw_data: str, manifest: str, manifest_uuid_col: str, manifest_session_id_col: str, group: List[str], output_file: str, disable_all: bool, enable: List[str], disable: List[str]):
     """Generates a configuration file for creating a moseq-reports msq file."""
     output_file = os.path.abspath(output_file)
+    args = locals()
 
     config = MoseqReportsConfig()
 
@@ -45,7 +48,15 @@ def make_config(name: str, model: str, index: str, raw_data: str, manifest: str,
     config.msq.tmp_dir = os.path.join(output_dir, "tmp")
 
     # set model configuration
-    config.model = get_model_config(model, index, manifest, raw_data, group)
+    config.model = get_model_config(
+        model_file=model, 
+        index_file=index,
+        manifest_file=manifest,
+        manifest_uuid_col=manifest_uuid_col,
+        manifest_session_id_col=manifest_session_id_col,
+        raw_dir=raw_data,
+        groups=group
+    )
 
     if disable_all:
         for producer_name, producer_config in config.producers.items():
@@ -121,7 +132,7 @@ def make_report(config_file: str):
     msq.write_unstructured("msq_config.json", config.to_dict())
     msq.manifest["msq_config"] = "msq_config.json"
 
-    add_file_logging(os.path.join(config.msq.out_dir, "moseq_reports.log"))
+    add_file_logging(os.path.join(config.msq.out_dir, f"{config.msq.name}.msq-maker.log"))
 
     errors = []
     for producer_name, producer_config in config.producers.items():

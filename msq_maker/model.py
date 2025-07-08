@@ -34,7 +34,7 @@ def parse_manifest(manifest_file: str) -> pd.DataFrame:
     return df
 
 
-def get_model_config(model_file: Optional[str], index_file: Optional[str], manifest_file: Optional[str], raw_dir: Optional[str], groups: Optional[List[str]]) -> ModelConfig:
+def get_model_config(model_file: Optional[str], index_file: Optional[str], manifest_file: Optional[str], manifest_uuid_col: str, manifest_session_id_col: str, raw_dir: Optional[str], groups: Optional[List[str]]) -> ModelConfig:
     """Retrieves the model configuration for a given model name.
 
     Args:
@@ -90,9 +90,11 @@ def get_model_config(model_file: Optional[str], index_file: Optional[str], manif
 
     if manifest_file is not None:
         config.manifest_path = os.path.abspath(manifest_file)
+        config.manifest_uuid_column = manifest_uuid_col
+        config.manifest_session_id_column = manifest_session_id_col
         manifest = parse_manifest(manifest_file)
         if config.manifest_uuid_column not in manifest.columns:
-            logging.warning(f"Manifest does not contain the column \"{config.manifest_uuid_column}\", which shoudl contain the UUIDs of the recordings. You are responsible for setting the correct column in the [model] section of the configuration.")
+            logging.warning(f"Manifest does not contain the column \"{config.manifest_uuid_column}\", which should contain the UUIDs of the recordings. You are responsible for setting the correct column in the [model] section of the configuration.")
         if config.manifest_session_id_column not in manifest.columns:
             logging.warning(f"Manifest does not contain the column \"{config.manifest_session_id_column}\", which should contain the session IDs of the recordings. You are responsible for setting the correct column in the [model] section of the configuration.")
 
