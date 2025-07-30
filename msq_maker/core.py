@@ -41,6 +41,7 @@ class SelfDocumentingMixin:
                     type_name = attr.type.__name__
                 else:
                     type_name = str(attr.type).replace("typing.", "").replace("typing_extensions.", "")
+                type_name = type_name.replace("NoneType", "None")
 
                 # figure out the default value
                 # if the field uses a default_factory, we call it to get the default value
