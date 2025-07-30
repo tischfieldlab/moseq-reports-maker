@@ -12,7 +12,7 @@ from moseq2_viz.helpers.wrappers import make_crowd_movies_wrapper
 import numpy as np
 import pandas as pd
 
-from ..util import ensure_even
+from ..util import ensure_even, get_cpu_count
 from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
@@ -21,7 +21,7 @@ class CrowdMoviesConfig(BaseOptionalProducerArgs):
     """Configuration for the `crowd_movies` producer, implemented by the moseq2-viz package."""
     raw_size: Union[Literal["auto"], Tuple[int, int]] = field(default="auto", metadata={"doc": "Size of the raw depth movie. If auto, will be estimated from the extraction metadata."})
     max_examples: int = field(default=40, metadata={"doc": "Maximum number of examples to show per syllable."})
-    processes: Union[int, None] = field(default=None, metadata={"doc": "Number of processes to use for creating movies."})
+    processes: Union[int, Literal["auto"]] = field(default="auto", metadata={"doc": "Number of processes to use for creating movies. If \"auto\", will use the number of available CPU cores (taking into account CPU affinity on systems that support it)."})
     gaussfilter_space: Tuple[float, float] = field(default=(0,0), metadata={"doc": "x sigma and y sigma for Gaussian spatial filter to apply to data."})
     medfilter_space: int = field(default=0, metadata={"doc": "kernel size for median spatial filter."})
     min_height: int = field(default=5, metadata={"doc": "Minimum height for scaling videos."})
@@ -68,7 +68,7 @@ class CrowdMoviesProducer(BaseProducer[CrowdMoviesConfig]):
         crowd_movies_config = {
             "max_syllable": self.config.model.max_syl,
             "max_examples": self.pconfig.max_examples,
-            "processes": self.pconfig.processes,
+            "processes": self.pconfig.processes if self.pconfig.processes != "auto" else get_cpu_count(),
             "separate_by": self.pconfig.separate_by,
             "specific_syllable": self.pconfig.specific_syllable,
             "session_names": self.pconfig.session_names,

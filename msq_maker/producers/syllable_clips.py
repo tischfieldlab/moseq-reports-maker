@@ -24,7 +24,7 @@ class SyllableClipsConfig(BaseOptionalProducerArgs):
     max_examples: int = field(default=10, metadata={"doc": "Maximum number of examples to show per syllable."})
     streams: List[str] = field(default_factory=list, metadata={"doc": "List of streams to include in the output. Available streams: depth, rgb, ir, composed, but may depend on the modalities used when acquiring the raw data."})
     rgb_crop: Union[Literal["none", "auto"], Tuple[int,int,int,int]] = field(default="auto", metadata={"doc": "Crop to apply to RGB clips. If 'none', no crop is applied. If 'auto', the crop is determined automatically based on the extracted data ROI (only works properly if depth and RGB are the same shape, typical for Kinect2 data). Otherwise, a tuple of (x1, y1, x2, y2) defining the crop region."})
-    processors: int = field(default=get_cpu_count() // 2, metadata={"doc": "Number of processors to use for parallel processing. Defaults to half the number of available CPU cores."})
+    processors: Union[int, Literal["auto"]] = field(default="auto", metadata={"doc": "Number of processors to use for parallel processing. If \"auto\", will use the number of available CPU cores (taking into account CPU affinity on systems that support it)."})
     extra_args: List[str] = field(default_factory=list, metadata={"doc": "Additional command line arguments to pass to the `syllable-clips` command, each token as an item in the list (à la subprocess style)."})
 
     def __post_init__(self):
@@ -56,8 +56,6 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
             "corpus-multiple",
             self.mconfig.index,
             self.mconfig.model,
-            "--processors",
-            str(self.pconfig.processors),
             "--dir",
             abs_out_dir,
             "--name",
@@ -77,6 +75,9 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
             "--crop-rgb",
             self.pconfig.get_rgb_crop(),
         ]
+        if self.pconfig.processors != "auto":
+            syl_clip_args.extend(["--processors", str(self.pconfig.processors)])
+
         if self.mconfig.manifest_path is not None:
             syl_clip_args.extend(["--manifest", self.mconfig.manifest_path, "--man-uuid-col", self.mconfig.manifest_uuid_column, "--man-session-id-col", self.mconfig.manifest_session_id_column])
 

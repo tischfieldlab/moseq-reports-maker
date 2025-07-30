@@ -3,7 +3,8 @@ import logging
 import os
 import subprocess
 from dataclasses import dataclass, field
-from typing import List, Type
+from typing import List, Type, Union
+from typing_extensions import Literal
 
 from ..util import get_cpu_count
 from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
@@ -16,7 +17,7 @@ class SpinogramsConfig(BaseOptionalProducerArgs):
     This producer produces spinograms. For more specific information you can check the `moseq-spinogram` package.
     """
     max_examples: int = field(default=10, metadata={"doc": "Maximum number of examples to generate for each syllable."})
-    processors: int = field(default=get_cpu_count() // 2, metadata={"doc": "Number of processors to use for parallel processing. Defaults to half the number of available CPU cores."})
+    processors: Union[int, Literal["auto"]] = field(default="auto", metadata={"doc": "Number of processors to use for parallel processing. If \"auto\", will use the number of available CPU cores (taking into account CPU affinity on systems that support it)."})
     extra_args: List[str] = field(default_factory=list, metadata={"doc": "Additional command line arguments to pass to the `spinograms` command, each token as an item in the list (à la subprocess style)."})
 
 
@@ -54,9 +55,10 @@ class SpinogramsProducer(BaseProducer[SpinogramsConfig]):
             self.mconfig.count,
             "--max-examples",
             str(self.pconfig.max_examples),
-            "--processors",
-            str(self.pconfig.processors),
         ]
+        if self.pconfig.processors != "auto":
+            spinogram_args.extend(["--processors", str(self.pconfig.processors)])
+
         if self.mconfig.sort:
             spinogram_args.append("--sort")
 
