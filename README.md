@@ -80,7 +80,7 @@ msq-maker explain-config crowd_movies
 ```
 About the configuration for `crowd_movies`
 
-    Configuration for the `crowd_movies` producer, implemented by the moseq2-viz package..
+    Configuration for the `crowd_movies` producer, implemented by the moseq2-viz package.
 
 This producer is optional. You can enable or disable it in the configuration file.
 
@@ -88,17 +88,17 @@ Configuration Items:
   - enabled (bool): Enable or disable this producer. (default: True)
   - raw_size (Union[Literal['auto'], Tuple[int, int]]): Size of the raw depth movie. If auto, will be estimated from the extraction metadata. (default: auto)
   - max_examples (int): Maximum number of examples to show per syllable. (default: 40)
-  - processes (Union[int, NoneType]): Number of processes to use for creating movies. (default: None)
+  - processes (Union[int, Literal['auto']]): Number of processes to use for creating movies. If "auto", will use the number of available CPU cores (taking into account CPU affinity on systems that support it). (default: auto)
   - gaussfilter_space (Tuple[float, float]): x sigma and y sigma for Gaussian spatial filter to apply to data. (default: (0, 0))
   - medfilter_space (int): kernel size for median spatial filter. (default: 0)
   - min_height (int): Minimum height for scaling videos. (default: 5)
   - max_height (int): Maximum height for scaling videos. (default: 80)
   - cmap (str): Color map to use for depth movies. (default: "jet")
   - separate_by (Literal['default', 'groups', 'sessions', 'subjects']): Generate crowd movies by specified grouping. (default: default)
-  - specific_syllable (Union[int, NoneType]): Index of the specific syllable to render. (default: None)
+  - specific_syllable (Union[int, None]): Index of the specific syllable to render. (default: None)
   - session_names (List[str]): Specific sessions to create crowd movies from. (default: [])
   - scale (float): Scaling from pixel units to mm. (default: 1.0)
-  - max_dur (Union[int, NoneType]): Exclude syllables longer than this number of frames (None for no limit). (default: 60)
+  - max_dur (Union[int, None]): Exclude syllables longer than this number of frames (None for no limit). (default: 60)
   - min_dur (int): Exclude syllables shorter than this number of frames. (default: 0)
   - legacy_jitter_fix (bool): Set to true if you notice jitter in your crowd movies. (default: False)
   - frame_path (str): Path to depth frames in h5 file. (default: "frames")
