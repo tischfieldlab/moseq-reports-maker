@@ -2,7 +2,7 @@
 package to generate *.msq files from moseq data for consumption by moseq-reports
 
 ## Install
-`moseq-reports-maker` can be installed into a `moseq2-app` environment, or you could make your own virtual environment:
+`moseq-reports-maker` can be installed into an existing `moseq2-app` environment, or you could make your own virtual environment:
 ```sh
 conda create -n moseq-reports-maker python=3.7
 conda activate moseq-reports-maker
@@ -20,6 +20,11 @@ Then install this package:
 ```sh
 pip install git+https://github.com/tischfieldlab/moseq-reports-maker.git
 ```
+
+### A note about models and environments
+Although this package has no hard dependency on the [`moseq2-model`](https://github.com/dattalab/moseq2-model) package, if your model was generated using the `--save-model True` parameter (by default `True`), loading the model will require installation of the `moseq2-model` package, as unpickling the `model` key within the saved model `dict` would require `moseq2-model` classes and their dependencies.
+
+An alternative workaround is to remove this key from the model `dict` and save the result back to disk. This can make the model more portable (accessible on OS's that are not supported by `moseq2-model`, ex Windows), and allow you to load the model without having `moseq2-model` installed in your environment. For this option, see the script [`fix_model.py`](scripts/fix_model.py) and the associated [`fix_model.README.md`](scripts/fix_model.README.md) in the scripts folder of this repo.
 
 ## Usage
 Begin by creating a configuration file:
