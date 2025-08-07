@@ -1,14 +1,13 @@
 import json
 import logging
 import os
-import subprocess
 from dataclasses import dataclass, field
 from typing import List, Tuple, Type, Union
 from typing_extensions import Literal
 
 import pandas as pd
 
-from ..util import get_cpu_count
+from ..util import run_and_log_subprocess
 from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
@@ -87,7 +86,7 @@ class SyllableClipsProducer(BaseProducer[SyllableClipsConfig]):
         if self.pconfig.extra_args:
             syl_clip_args.extend(self.pconfig.extra_args)
 
-        subprocess.check_call(syl_clip_args)
+        run_and_log_subprocess(syl_clip_args)
 
         args_path = os.path.join(abs_out_dir, "{}.args.json".format(basename))
         with open(args_path) as args_file:

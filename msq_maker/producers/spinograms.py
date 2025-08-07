@@ -1,12 +1,11 @@
 import glob
 import logging
 import os
-import subprocess
 from dataclasses import dataclass, field
 from typing import List, Type, Union
 from typing_extensions import Literal
 
-from ..util import get_cpu_count
+from ..util import run_and_log_subprocess
 from ..core import BaseProducer, BaseOptionalProducerArgs, PluginRegistry, MSQ
 
 
@@ -65,6 +64,6 @@ class SpinogramsProducer(BaseProducer[SpinogramsConfig]):
         if self.pconfig.extra_args:
             spinogram_args.extend(self.pconfig.extra_args)
 
-        subprocess.check_call(spinogram_args)
+        run_and_log_subprocess(spinogram_args)
 
         msq.manifest["spinograms"] = out_name

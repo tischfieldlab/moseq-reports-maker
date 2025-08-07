@@ -1,6 +1,8 @@
 import logging
+import subprocess
 import sys
-from typing import Dict, Union
+import threading
+from typing import IO, Dict, List, Union
 import psutil
 from typing_extensions import TypedDict, Literal
 from moseq2_viz.model.util import parse_model_results, relabel_by_usage, get_syllable_statistics
@@ -182,3 +184,44 @@ def add_file_logging(log_file: str) -> None:
     file_formatter = logging.Formatter("{asctime} {levelname:8s} {message}", style="{")
     handler.setFormatter(file_formatter)
     logger.addHandler(handler)
+
+
+def log_subprocess_output(pipe: IO[str], log_level=logging.INFO):
+    """Reads lines from a pipe and logs them."""
+    for line in iter(pipe.readline, ''):
+        logger.log(log_level, line.strip())
+    pipe.close()
+
+def run_and_log_subprocess(command: List[str]):
+    """Runs a subprocess and logs its stdout and stderr."""
+    try:
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,  # Decodes stdout/stderr as text
+            bufsize=1  # Line-buffered output
+        )
+
+        # Start threads to read and log stdout and stderr concurrently
+        stdout_thread = threading.Thread(target=log_subprocess_output, args=(process.stdout, logging.INFO))
+        stderr_thread = threading.Thread(target=log_subprocess_output, args=(process.stderr, logging.INFO))
+
+        stdout_thread.start()
+        stderr_thread.start()
+
+        # Wait for the process to complete and threads to finish
+        process.wait()
+        stdout_thread.join()
+        stderr_thread.join()
+
+        if process.returncode != 0:
+            logger.error(f"Subprocess exited with code {process.returncode}")
+            raise subprocess.CalledProcessError(process.returncode, command)
+
+    except FileNotFoundError:
+        logger.error(f"Command not found: {command[0]}")
+        raise
+    except Exception as e:
+        logger.exception(f"An error occurred while running the subprocess: {e}")
+        raise
