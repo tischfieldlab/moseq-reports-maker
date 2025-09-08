@@ -1,5 +1,5 @@
 # Moseq-Reports-Maker
-package to generate *.msq files from moseq data for consumption by moseq-reports
+A package to generate *.msq files from moseq data for consumption by [moseq-reports](https://github.com/tischfieldlab/moseq-reports)
 
 ## Install
 `moseq-reports-maker` can be installed into an existing `moseq2-app` environment, or you could make your own virtual environment:
