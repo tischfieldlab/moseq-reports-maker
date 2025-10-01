@@ -60,7 +60,7 @@ def get_model_config(model_file: Optional[str], index_file: Optional[str], manif
         config.index = os.path.abspath(index_file)
         index, _ = parse_index(config.index)
         available_groups = get_groups_index(config.index)
-        if groups is not None or len(groups) > 0:
+        if groups is not None and len(groups) > 0:
             logging.info("Groups were supplied")
             actual_groups = []
             for g in groups:
