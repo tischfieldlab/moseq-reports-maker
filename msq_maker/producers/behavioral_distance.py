@@ -3,6 +3,7 @@ from typing import List, Type
 
 from moseq2_viz.model.dist import get_behavioral_distance
 from moseq2_viz.util import parse_index
+import numpy as np
 import pandas as pd
 
 from ..util import get_max_states, get_syllable_id_mapping, syllableMatricesToLongForm
@@ -28,15 +29,16 @@ class BehavioralDistanceProducer(BaseProducer[BehavioralDistanceConfig]):
     def run(self, msq: MSQ):
         _, sorted_index = parse_index(self.mconfig.index)
         dist_opts = {"ar[dtw]": {"parallel": True}, "pca": {"parallel": True}}
-        dist = get_behavioral_distance(
-            sorted_index,
-            self.mconfig.model,
-            max_syllable=get_max_states(self.mconfig.model),
-            sort_labels_by_usage=False,
-            count="usage",
-            dist_options=dist_opts,
-            distances=self.pconfig.distances,
-        )
+        with np.errstate(invalid='ignore'):
+            dist = get_behavioral_distance(
+                sorted_index,
+                self.mconfig.model,
+                max_syllable=get_max_states(self.mconfig.model),
+                sort_labels_by_usage=False,
+                count="usage",
+                dist_options=dist_opts,
+                distances=self.pconfig.distances,
+            )
 
         syllable_mapping = get_syllable_id_mapping(self.mconfig.model)
 
