@@ -29,7 +29,7 @@ class BehavioralDistanceProducer(BaseProducer[BehavioralDistanceConfig]):
     def run(self, msq: MSQ):
         _, sorted_index = parse_index(self.mconfig.index)
         dist_opts = {"ar[dtw]": {"parallel": True}, "pca": {"parallel": True}}
-        with np.errstate(invalid='ignore'):
+        with np.errstate(invalid='ignore', divide='ignore'):
             dist = get_behavioral_distance(
                 sorted_index,
                 self.mconfig.model,
